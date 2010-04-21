@@ -1,0 +1,15 @@
+Package: flowTrans
+Type: Package
+Title: Parameter Optimization for Flow Cytometry Data Transformation 
+Version: 0.6.4
+Date: 2010-04-21
+Author: Greg Finak <greg.finak@ircm.qc.ca>, Juan Manuel-Perez <jperez@ircm.qc.ca>, Raphael Gottardo <raphael.gottardo@ircm.qc.ca>
+Maintainer: Greg Finak <greg.finak@ircm.qc.ca>
+Description: Profile maximum likelihood estimation of parameters for flow cytometry data transformations. 
+License: Artistic-2.0
+LazyLoad: yes
+biocViews: Bioinformatics, FlowCytometry
+Depends: R (>= 2.11.0), flowCore, flowViz
+Imports: flowCore, methods, flowViz, stats, flowClust
+Collate: mclMultivArcSinh.R mclMultivBiexp.R mclMultivLinLog.R mclMultivBoxCox.R arcsinhTransformWrapper.R biexponentialTransformWrapper.R boxcoxTransform.R flowTrans.R linLog.R setMethods.R
+

@@ -1,0 +1,12 @@
+export(flowTrans);
+export(extractParams);
+export(summary.flowTransResult)
+import(flowCore);
+import(flowViz);
+
+importFrom(methods,"@<-",getFunction,new)
+importFrom(stats,D,cov,optim,optimize,runif);
+importFrom(flowClust,box);
+exportMethods(
+    "flowTrans"
+)
