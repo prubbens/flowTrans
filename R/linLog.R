@@ -1,0 +1,19 @@
+linlogTransform<-function(transformationId,pars){
+    t<-new("transform",.Data=function(x){
+        x<-apply(as.matrix(x),2,function(y)y)
+        x<-linlog(x,lambda=pars[1])
+    })
+    t@transformationId<-transformationId
+    t
+}
+
+linlog<-function(x,lambda){
+    x<-apply(x,2,function(y){
+        wh<-which(y>lambda)
+        wl<-which(y<=lambda)
+        y[wl]<-(y[wl]-lambda)/lambda+log(lambda);
+        y[wh]<-log(y[wh]);
+        y;
+    })
+    x;
+}
