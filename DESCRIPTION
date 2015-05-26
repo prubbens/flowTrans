@@ -1,12 +1,12 @@
 Package: flowTrans
 Type: Package
 Title: Parameter Optimization for Flow Cytometry Data Transformation
-Version: 1.21.0
+Version: 1.21.1
 Date: 2010-04-21
-Author: Greg Finak <greg.finak@ircm.qc.ca>, Juan Manuel-Perez
+Author: Greg Finak <gfinak@fredhutch.org>, Juan Manuel-Perez
         <jperez@ircm.qc.ca>, Raphael Gottardo
-        <raphael.gottardo@ircm.qc.ca>
-Maintainer: Greg Finak <greg.finak@ircm.qc.ca>
+        <rgottard@fredhutch.org>
+Maintainer: Greg Finak <gfinak@fredhutch.org>
 Description: Profile maximum likelihood estimation of parameters for
         flow cytometry data transformations.
 License: Artistic-2.0
