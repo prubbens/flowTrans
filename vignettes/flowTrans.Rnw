@@ -1,0 +1,104 @@
+%\VignetteIndexEntry{flowTrans package}
+%\VignetteKeywords{Preprocessing, statistics}
+%\VignettePackage{flowTrans}
+%\VignetteDepends{flowTrans}
+
+
+
+\documentclass{article}
+\usepackage{cite, hyperref,topcapt,booktabs}
+\usepackage{Sweave}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textsf{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+
+\title{flowTrans: A Package for Optimizing Data Transformations for Flow Cytometry}
+\author{Greg Finak, Raphael Gottardo}
+
+\begin{document}
+\setkeys{Gin}{width=1.0\textwidth, height=1.1\textwidth}
+
+\maketitle
+\begin{center}
+{\tt greg.finak@ircm.qc.ca, raphael.gottardo@ircm.qc.ca}
+\end{center}
+
+\textnormal{\normalfont}
+
+\tableofcontents
+\newpage
+
+
+\section{Licensing}
+
+Under the Artistic License, you are free to use and redistribute this software. 
+\begin{itemize}
+\item[] Greg Finak, Juan--Manuel Perez, Andrew Weng, Raphael Gottardo. Optimizing Data Transformations for Flow Cytometry. (In Preparation)
+\end{itemize}
+
+\section{Overview}
+\Rpackage{flowTrans} is an R package for optimizing the parameters of the most commonly used flow cytometry data transformations with the goal of making the data appear more normally distributed, have decreased skewness or kurtosis. The end result is often a transformation that makes flow cytometry cell populations appear more symmetric, better resolved, thus simplifying population gating. In high throughput experiments, \Rpackage{flowTrans} reduces the variability in the location of discovered cell populations when compared to untransformed data, or data transformed with default transformation parameters.
+
+The package implements a single user -- callable function \Rfunction{flowTrans}, which takes a \Rclass{flowFrame} as input, as well as the names of the dimensions to be transformed, and the name of the transformation function to be applied. There are four transformations available in \Rfunction{flowTrans}. The transforms are multivariate, are meant to transform two or more dimensions, and will estimate a common set of transformation parameters for all dimensions simultaneously via profile maximum likelihood, with the global distribution of the transformed data tending towards multivariate normal. All the transformation functions in the package are summarized in Table~\ref{tab:functions}.
+
+
+% Requires the booktabs if the memoir class is not being used
+\begin{table}[htbp]
+   \centering
+   %\topcaption{Table captions are better up top} % requires the topcapt package
+   \begin{tabular}{@{} lcccr @{}} % Column formatting, @{} suppresses leading/trailing space
+      \toprule
+      Function Name  & Transformation & Dimensionality &  Parameters &Optimization Criteria\\
+      \midrule
+      mclMultivBoxCox&Box--Cox&Multivariate&Common& Normality\\
+      mclMultivArcSinh&ArcSinh& Multivariate&Common& Normality\\
+      mclMultivBiexp&Biexponential& Multivariate&Common& Normality\\
+      mclMultivLinLog&LinLog& Multivariate&Common& Normality\\
+          \bottomrule
+   \end{tabular}
+   \caption{A summary of the transformations that can be called via the \texttt{flowTrans} function.}
+   \label{tab:functions}
+\end{table}
+\section{Example: Optimizing Data Transformations for the GvHD Data Set}
+We present a simple example, transforming the samples in the \Robject{GvHD} data set. We begin by attaching the data, then transforming each sample in the forward and side scatter dimensions with the parameter--optimized multivariate arcsinh transform.
+<<loaddata>>=
+library(flowTrans)
+data(GvHD)
+transformed<-lapply(as(GvHD[1:4],"list"),function(x)flowTrans(dat=x,fun="mclMultivArcSinh",dims=c("FSC-H","SSC-H"),n2f=FALSE,parameters.only=FALSE));
+@
+We can extract the parameters used for the transformation of each dimension in each sample. The returned object is a list of transformed samples, each sample is itself composed of a list with the first element corresponding to the transformed \Rclass{flowFrame}, and the second element a list of the transformation parameters applied to each dimension. For example, to extract the parameters used to transform sample 2, dimension 1 (FSC) we would call \verb@extractParams(x=transformed[[2]],dims=colnames(transformed[[2]])[1])@.
+
+<<parameters>>=
+parameters<-do.call(rbind,lapply(transformed,function(x)extractParams(x)[[1]]))
+parameters;
+@
+We see that the parameters, $a$ and $b$, of \Rfunction{arcsinh} vary considerably across the different samples, due to the data-dependence of the optimal transformation. We can plot the transformed and untransformed samples for comparison (samples 2 and 4 in this case). 
+
+<<plot,fig=TRUE>>=
+par(mfrow = c(2, 2))
+plot(GvHD[[2]], c("FSC-H", "SSC-H"), main = "Untransformed sample")
+contour(GvHD[[2]], c("FSC-H","SSC-H"),add=TRUE);
+plot(transformed[[2]]$result, c("FSC-H", "SSC-H"), main = "Transformed sample")
+contour(transformed[[2]]$result,c("FSC-H","SSC-H"),add=TRUE);
+plot(GvHD[[4]], c("FSC-H", "SSC-H"), main = "Untransformed sample")
+contour(GvHD[[4]], c("FSC-H","SSC-H"),add=TRUE);
+plot(transformed[[4]]$result, c("FSC-H", "SSC-H"), main = "Transformed sample")
+contour(transformed[[4]]$result, c("FSC-H","SSC-H"),add=TRUE);
+@
+
+Similarly, we can apply the multivariate transformation of the forward and
+side scatter channels, but return only the parameters, for inclusion in a
+\Rpackage{flowCore} workflow. 
+
+<<multivtrans,fig=FALSE>>=
+transformed2<-flowTrans(dat=GvHD[[2]],fun="mclMultivArcSinh",dims=c("FSC-H","SSC-H"),n2f=FALSE,parameters.only=TRUE)
+transformed2
+@
+
+\section{Future Improvements}
+In the near future, we plan to implement inverse transformation functions via S4 classes and objects, such that transformed data can be inverse transformed without the need to call internal \verb@flowTrans@ functions.
+\end{document}  
